@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversa</title>
+    <link rel="stylesheet" href="/convstyles.css" type="text/css">
+</head>
+<body>
+    <div class="conversation-header">
+        <h1><%= contact %></h1>
+    </div>
+    <div class="conversation-container" id="conversation-container">
+        <ul class="message-list" id="messageHist">
+            <% messages.forEach(message => { %>
+                <% if(message.from != contact) { %>
+                <li class="own-message">
+                    <div class="message-container"><%= message.from %>: <%= message.message %></div><br>
+                    <p><div class="message-hour-own">
+                        <a><%= message.hour %></a>
+                    </div></p>
+                </li>
+            <% } else {%>
+                <li class="other-message">
+                    <div class="message-container"><%= message.from %>: <%= message.message %></div><br>
+                    <p><div class="message-hour-other">
+                        <a><%= message.hour %></a>
+                    </div></p>
+                </li>
+            <% }%>
+            <% }); %>
+        </ul>
+        <li class="message-list" id="messageList">
+            <!-- Lista de mensagens será renderizada aqui -->
+        </li>
+        <p id="username" style="display: none;"><%= username %></p>
+        <p id="contactName" style="display: none;">Nome</p>
+    </div>
+    <div class="message-input">
+        <input type="text" id="messageInput" placeholder="Digite sua mensagem" onkeydown="if (event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <div class="background-image"></div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('conversation-container').scrollTo(0, document.getElementById('conversation-container').scrollHeight);
+        })
+
+
+        // Obter o nome do contato da URL
+        const contactUsername = decodeURIComponent(window.location.pathname.split('/').pop());
+        document.getElementById('contactName').textContent = contactUsername;
+
+        // Função para enviar mensagem
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message !== '') {
+                const from = document.getElementById('username').textContent;
+                const to = contactUsername;
+                const data = { from: from, to: to, message: message };
+                socket.emit('chat message', data);
+                messageInput.value = '';
+            }
+        }
+
+        // Entrar na sala de conversa
+        socket.emit('join conversation', { username: document.getElementById('username').textContent, contact: contactUsername });
+
+        // Receber mensagens do servidor e renderizar na página
+        socket.on('chat message', (msg) => {
+            const item = document.createElement('li');
+            const messageContainer = document.createElement('div');
+            const paragraph = document.createElement('p');
+            const messageHour = document.createElement('div');
+            const br = document.createElement('br');
+            messageContainer.textContent = `${msg.from}: ${msg.msg.message}`;
+            messageHour.textContent = `${msg.hour}`;
+            messageContainer.classList.add('message-container');
+            messageHour.classList.add('message-hour-other');
+            item.appendChild(messageContainer);
+            item.appendChild(br);
+            item.classList.add('other-message');
+            if (msg.msg.from === document.getElementById('username').textContent) {
+                messageHour.classList.remove('message-hour-other');
+                messageHour.classList.add('message-hour-own');
+            }
+            paragraph.appendChild(messageHour);
+            item.appendChild(paragraph);
+            if (msg.msg.from === document.getElementById('username').textContent) {
+                item.classList.remove('other-message');
+                item.classList.add('own-message');
+            }
+            document.getElementById('messageList').appendChild(item);
+            document.getElementById('conversation-container').scrollTo(0, document.getElementById('conversation-container').scrollHeight);
+        });
+    </script>
+</body>
+</html>

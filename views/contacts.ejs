@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contatos</title>
+    <link rel="stylesheet" href="/contactstyles.css">
+</head>
+<body>
+    <div class="contacts-header">
+        <h1>Seus Contatos</h1>
+    </div>
+    <div class="contacts-container">
+        <div class="contact-list" id="contactList">
+            <% contacts.forEach(contact => { %>
+                <div class="contact-item" onclick="openConversation('<%= contact.username %>')">
+                    <a href="/conversation/<%= encodeURIComponent(contact.username) %>?username=<%= encodeURIComponent(username) %>"><%= contact.name %></a>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <div class="background-image"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Função para abrir a conversa com um contato
+        function openConversation(contact) {
+            const username = '<%= username %>';
+            window.location.href = `/conversation/${encodeURIComponent(contact)}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = '<%= username %>';
+            if (username === 'admin') {
+                const adminButton = document.createElement('button');
+                adminButton.className = 'adminButton';
+                adminButton.textContent = 'Configuração';
+                adminButton.onclick = () => {
+                    window.location.href = '/admin';
+                };
+                const contactsHeader = document.querySelector('.contacts-header');
+                contactsHeader.insertBefore(adminButton, contactsHeader.querySelector('h1'));
+            }
+        });
+    </script>
+</body>
+</html>

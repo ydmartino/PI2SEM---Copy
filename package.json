@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "luxon": "^3.4.4",
+    "socket.io": "^4.7.5",
+    "sqlite3": "^5.1.7"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npx nodemon server.js"
+  },
+  "name": "repoteste",
+  "version": "1.0.0",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "<h1 align = \"center\">\r      Canal de comunicação interna - CHAT\r </h1>",
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
